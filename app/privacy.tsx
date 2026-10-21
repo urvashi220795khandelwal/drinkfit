@@ -6,27 +6,27 @@ export default function Privacy() {
     <Screen>
       <H1>Privacy policy</H1>
       <Card>
-        <H2>Data kahan rehta hai?</H2>
+        <H2>Where is my data stored?</H2>
         <Muted>
-          Tumhari profile aur daily entries by default sirf tumhare phone par save hoti hain. Account banane par hi data
-          cloud (Supabase) par sync hota hai, taaki dusre device par bhi mil sake.
+          By default, your profile and daily entries are saved only on your phone. Your data syncs to the cloud
+          (Supabase) only if you create an account, so you can access it on other devices.
         </Muted>
-        <H2>Hum kya nahi karte</H2>
-        <Muted>Koi ads nahi, koi payment nahi, aur tumhara data kisi ko becha ya share nahi kiya jata.</Muted>
+        <H2>What we don't do</H2>
+        <Muted>No ads, no payments, and your data is never sold or shared with anyone.</Muted>
         <H2>Login security</H2>
-        <Muted>Login session phone ke encrypted SecureStore mein rehta hai.</Muted>
-        <H2>Data delete karna</H2>
+        <Muted>Your login session is stored in your phone's encrypted SecureStore.</Muted>
+        <H2>Deleting your data</H2>
         <Muted>
-          Profile screen se tum phone ka saara data hata sakte ho, aur account delete karke cloud ka data bhi
-          permanently hata sakte ho.
+          From the Profile screen, you can remove all data from your phone. You can also delete your account to
+          permanently remove your cloud data.
         </Muted>
         <H2>Health disclaimer</H2>
         <Muted>
-          DrinkFit ke saare numbers estimate hain, medical advice nahi. Alcohol calorie equivalents safe drinking limit
-          nahi hain. Health se jude decisions ke liye doctor se baat karo.
+          All numbers in DrinkFit are estimates, not medical advice. Alcohol calorie equivalents are not safe drinking
+          limits. Talk to a doctor about any health-related decisions.
         </Muted>
       </Card>
-      <Button title="Wapas jao" variant="secondary" onPress={() => router.back()} />
+      <Button title="Go back" variant="secondary" onPress={() => router.back()} />
     </Screen>
   );
 }

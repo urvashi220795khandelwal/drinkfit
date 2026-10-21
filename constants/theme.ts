@@ -1,14 +1,13 @@
 export const colors = {
-  bg: '#121417',
-  card: 'rgba(255,255,255,0.06)',
-  cardBorder: 'rgba(255,255,255,0.10)',
-  input: 'rgba(255,255,255,0.08)',
-  text: '#F2F5F3',
-  muted: '#9AA5A0',
-  green: '#22C55E',
-  lime: '#A3E635',
-  warn: '#FBBF24',
-  danger: '#F87171',
-  tabBar: '#16191D',
+  bg: '#F5F7FA',          // app background
+  card: '#FFFFFF',        // card surface
+  cardBorder: '#E2E6EC',  // borders / dividers
+  tabBar: '#FFFFFF',
+  input: '#EEF1F5',       // input fields, secondary buttons, switch track (off)
+  text: '#111827',        // primary text
+  muted: '#6B7280',       // secondary text
+  lime: '#4D7C0F',        // brand accent (darker lime so it's readable on white)
+  green: '#16A34A',
+  warn: '#D97706',
+  danger: '#DC2626',
 };
-export const radius = 18;

@@ -29,7 +29,7 @@ export default function History() {
   const toGoal = +Math.abs(latest - profile.targetWeight).toFixed(1);
 
   const confirmDelete = (date: string) =>
-    Alert.alert('Entry delete karein?', `${formatDateKey(date)} ki entry hamesha ke liye hat jayegi.`, [
+    Alert.alert('Delete entry?', `The entry for ${formatDateKey(date)} will be permanently deleted.`, [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Delete', style: 'destructive', onPress: () => void removeLog(date) },
     ]);
@@ -39,9 +39,9 @@ export default function History() {
       <H1>History & progress</H1>
 
       <Card>
-        <H2>Is hafte</H2>
+        <H2>This week</H2>
         <Muted>
-          {logged.length}/7 din entry • Avg food {avgFood} kcal • Exercise {weekExercise} kcal
+          {logged.length}/7 days logged • Avg food {avgFood} kcal • Exercise {weekExercise} kcal
         </Muted>
         <View style={st.chart}>
           {target > 0 && <View style={[st.targetLine, { bottom: (target / maxBar) * BAR_HEIGHT + 18 }]} />}
@@ -61,22 +61,22 @@ export default function History() {
             );
           })}
         </View>
-        <Muted small>Dotted line = daily target ({target} kcal). Laal bar = target se zyada.</Muted>
+        <Muted small>Dotted line = daily target ({target} kcal). Red bar = over target.</Muted>
       </Card>
 
       <Card>
         <H2>Weight progress</H2>
         <Muted>
-          Shuruaat: {profile.currentWeight} kg • Latest: {latest} kg • Change: {change > 0 ? '+' : ''}
+          Start: {profile.currentWeight} kg • Latest: {latest} kg • Change: {change > 0 ? '+' : ''}
           {change} kg
         </Muted>
         <Muted>
-          Goal ({profile.targetWeight} kg) tak abhi {toGoal} kg baaki.
+          {toGoal} kg left to reach your goal ({profile.targetWeight} kg).
         </Muted>
       </Card>
 
-      <H2>Saari entries</H2>
-      {logs.length === 0 && <Muted>Abhi koi entry nahi hai. Dashboard se aaj ki entry add karo.</Muted>}
+      <H2>All entries</H2>
+      {logs.length === 0 && <Muted>No entries yet. Add today's entry from the dashboard.</Muted>}
       {logs.map((l) => (
         <Card key={l.logDate}>
           <Text style={st.date}>{formatDateKey(l.logDate)}</Text>

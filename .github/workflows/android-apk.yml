@@ -39,6 +39,8 @@ jobs:
           rm -f App.tsx index.ts
           npx expo install react-dom expo-router @expo/vector-icons react-native-safe-area-context react-native-screens expo-linking expo-constants expo-status-bar react-native-svg @react-native-async-storage/async-storage expo-secure-store @supabase/supabase-js react-native-url-polyfill -- --legacy-peer-deps
           npx expo install jest-expo jest @types/jest -- --save-dev --legacy-peer-deps
+          RN_VERSION=$(node -p "require('react-native/package.json').version")
+          npm install --save-dev --legacy-peer-deps "@react-native/jest-preset@$RN_VERSION" || npm install --save-dev --legacy-peer-deps @react-native/jest-preset
 
       - name: Copy DrinkFit code into project
         run: |

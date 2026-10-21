@@ -10,10 +10,10 @@ import { dateKey, formatDateKey } from '../../utils/date';
 
 const ADJUST_MSG: Record<Exclude<TargetAdjustment, null>, string> = {
   deficit_capped:
-    'Tumhara goal bahut fast tha, isliye deficit 1000 kcal/din tak limit kiya gaya. Target days badhana better hoga.',
-  surplus_capped: 'Weight gain ke liye surplus 500 kcal/din tak limit kiya gaya.',
+    'Your goal was very aggressive, so your deficit was capped at 1000 kcal/day. Consider increasing your target days.',
+  surplus_capped: 'For weight gain, your surplus was capped at 500 kcal/day.',
   min_floor:
-    'Calorie target safe minimum se neeche ja raha tha, isliye minimum par set kiya. Doctor ya dietitian se baat karo.',
+    'Your calorie target was below the safe minimum, so it was set to the minimum. Please talk to a doctor or dietitian.',
 };
 
 export default function Dashboard() {
@@ -27,9 +27,9 @@ export default function Dashboard() {
   if (d.bmr === null || d.tdee === null || d.target === null || d.remaining === null) {
     return (
       <Screen>
-        <H1>Aaj ka calorie budget</H1>
-        <Notice tone="danger" text="BMR available nahi hai. Profile mein apna estimated BMR daalo." />
-        <Button title="Profile edit karo" onPress={() => router.push({ pathname: '/onboarding', params: { edit: '1' } })} />
+        <H1>Today's calorie budget</H1>
+        <Notice tone="danger" text="BMR is not available. Add your estimated BMR in your profile." />
+        <Button title="Edit profile" onPress={() => router.push({ pathname: '/onboarding', params: { edit: '1' } })} />
       </Screen>
     );
   }
@@ -43,37 +43,37 @@ export default function Dashboard() {
     <Screen>
       <View>
         <Text style={st.brand}>DrinkFit</Text>
-        <Muted>{formatDateKey(today)} • Tumhari daily progress</Muted>
+        <Muted>{formatDateKey(today)} • Your daily progress</Muted>
       </View>
 
       <Card style={st.center}>
-        <H2>Aaj ka calorie budget</H2>
+        <H2>Today's calorie budget</H2>
         <ProgressRing
           progress={progress}
           color={ringColor}
           centerTop={String(Math.abs(d.remaining))}
-          centerBottom={over ? 'kcal zyada ho gayi' : 'kcal baaki'}
+          centerBottom={over ? 'kcal over' : 'kcal left'}
         />
         <Muted small center>
-          {d.food} kcal khaya • {budget} kcal total budget (target + exercise)
+          {d.food} kcal eaten • {budget} kcal total budget (target + exercise)
         </Muted>
       </Card>
 
-      {!log && <Notice tone="info" text="Aaj ki entry abhi nahi hui. Food aur exercise add karo taaki budget sahi dikhe." />}
-      <Button title={log ? 'Aaj ki entry edit karo' : '+ Aaj ki entry add karo'} onPress={() => router.push('/daily-input')} />
+      {!log && <Notice tone="info" text="You haven't logged today yet. Add your food and exercise so your budget is accurate." />}
+      <Button title={log ? "Edit today's entry" : "+ Add today's entry"} onPress={() => router.push('/daily-input')} />
       {d.target.adjustment ? <Notice text={ADJUST_MSG[d.target.adjustment]} /> : null}
 
       <View style={st.grid}>
-        <Stat label="BMR (aaram mein)" value={d.bmr} />
-        <Stat label="TDEE (activity ke saath)" value={d.tdee} />
+        <Stat label="BMR (at rest)" value={d.bmr} />
+        <Stat label="TDEE (with activity)" value={d.tdee} />
         <Stat label="Daily target (estimate)" value={d.target.target} />
         <Stat label="Food calories" value={d.food} />
         <Stat label="Exercise calories" value={d.exercise} color={colors.green} />
         <Stat label="Remaining budget" value={d.remaining} color={over ? colors.danger : colors.lime} />
       </View>
       <Muted small>
-        Remaining = Target − Food + Exercise. Steps alag se add nahi hote, kyunki wo activity level mein already count
-        hain.
+        Remaining = Target − Food + Exercise. Steps aren't added separately because they're already counted in your
+        activity level.
       </Muted>
 
       {prefs.showAlcohol && <AlcoholCard remaining={d.remaining} alcohol={d.alcohol} />}
@@ -87,21 +87,21 @@ function AlcoholCard({ remaining, alcohol }: { remaining: number; alcohol: Alcoh
     <Card>
       <H2>Alcohol calorie equivalents</H2>
       <Muted small>
-        Ye sirf batata hai ki bachi hui calories kitne ml drink ke barabar hain. Ye safe drinking limit ya
-        recommendation NAHI hai.
+        This only shows how many ml of a drink your remaining calories equal. It is NOT a safe drinking limit or a
+        recommendation.
       </Muted>
       {none ? (
-        <Notice tone="danger" text="Aaj calorie budget cross ho gaya — alcohol avoid karna better hai." />
+        <Notice tone="danger" text="You've gone over today's calorie budget. It's best to avoid alcohol." />
       ) : (
-        <Notice text="Alcohol calories tumhare weight-loss goal ko affect kar sakti hain." />
+        <Notice text="Alcohol calories can affect your weight-loss goal." />
       )}
-      <AlcoholRow label="Beer ki calories (5%)" sub="43 kcal / 100 ml" ml={alcohol.beerMl} />
-      <AlcoholRow label="Whiskey/Vodka ki calories (40%)" sub="231 kcal / 100 ml" ml={alcohol.spiritsMl} />
-      <AlcoholRow label="Wine ki calories (12%)" sub="83 kcal / 100 ml" ml={alcohol.wineMl} />
-      <Text style={st.zero}>✓ 0 ml — Zero alcohol hamesha ek option hai, aur health ke liye sabse best.</Text>
+      <AlcoholRow label="Beer calories (5%)" sub="43 kcal / 100 ml" ml={alcohol.beerMl} />
+      <AlcoholRow label="Whiskey/Vodka calories (40%)" sub="231 kcal / 100 ml" ml={alcohol.spiritsMl} />
+      <AlcoholRow label="Wine calories (12%)" sub="83 kcal / 100 ml" ml={alcohol.wineMl} />
+      <Text style={st.zero}>✓ 0 ml — Zero alcohol is always an option, and the best one for your health.</Text>
       <Muted small>
-        Alcohol ke health risks calories se kahin zyada hain. Pregnancy, medicines, driving ya kisi health condition mein
-        alcohol bilkul na lo.
+        The health risks of alcohol go far beyond calories. Never drink alcohol if you're pregnant, taking medication,
+        driving, or have a health condition.
       </Muted>
     </Card>
   );

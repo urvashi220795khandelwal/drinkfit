@@ -15,7 +15,7 @@ export default function TabsLayout() {
     >
       <Tabs.Screen
         name="dashboard"
-        options={{ title: 'Aaj', tabBarIcon: ({ color, size }) => <Ionicons name="speedometer-outline" color={color} size={size} /> }}
+        options={{ title: 'Today', tabBarIcon: ({ color, size }) => <Ionicons name="speedometer-outline" color={color} size={size} /> }}
       />
       <Tabs.Screen
         name="history"

@@ -9,9 +9,9 @@ import { cloudEnabled, supabase } from '../../lib/supabase';
 
 const SYNC_TEXT: Record<SyncState, string> = {
   idle: '',
-  syncing: 'Sync ho raha hai...',
-  ok: 'Sab synced ✓',
-  error: 'Sync nahi hua — internet check karo. Data phone par safe hai.',
+  syncing: 'Syncing...',
+  ok: 'All synced ✓',
+  error: "Sync failed. Check your internet connection. Your data is safe on your phone.",
 };
 
 export default function ProfileScreen() {
@@ -23,8 +23,8 @@ export default function ProfileScreen() {
 
   const confirmResetLocal = () =>
     Alert.alert(
-      'Phone ka saara data delete karein?',
-      'Profile aur saari entries is phone se hat jayengi. Cloud account (agar hai) par asar nahi padega.',
+      'Delete all data on this phone?',
+      "Your profile and all entries will be removed from this phone. Your cloud account (if you have one) won't be affected.",
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -40,13 +40,13 @@ export default function ProfileScreen() {
 
   const logout = async () => {
     await supabase?.auth.signOut({ scope: 'local' });
-    Alert.alert('Logout ho gaya', 'Tumhara data phone par abhi bhi save hai.');
+    Alert.alert('Logged out', 'Your data is still saved on this phone.');
   };
 
   const confirmDeleteAccount = () =>
     Alert.alert(
-      'Account delete karein?',
-      'Cloud se tumhara account aur saara synced data permanently delete ho jayega. Ye undo nahi hoga.',
+      'Delete account?',
+      'Your account and all synced data will be permanently deleted from the cloud. This cannot be undone.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -56,13 +56,13 @@ export default function ProfileScreen() {
             if (!supabase) return;
             const { error } = await supabase.rpc('delete_my_account');
             if (error) {
-              Alert.alert('Delete nahi hua', 'Internet check karke dobara try karo.');
+              Alert.alert("Couldn't delete account", 'Check your internet connection and try again.');
               return;
             }
             await supabase.auth.signOut({ scope: 'local' });
             Alert.alert(
-              'Account delete ho gaya',
-              'Phone par data abhi bhi hai. Use bhi hatana ho to "Phone ka data delete karo" use karo.',
+              'Account deleted',
+              'Your data is still on this phone. To remove it as well, use "Delete phone data".',
             );
           },
         },
@@ -74,16 +74,16 @@ export default function ProfileScreen() {
       <H1>Profile & settings</H1>
 
       <Card>
-        <H2>Tumhari profile</H2>
+        <H2>Your profile</H2>
         <Muted>
-          {profile.age} saal • {gender} • {profile.height} cm
+          {profile.age} years • {gender} • {profile.height} cm
         </Muted>
         <Muted>
-          Weight: {profile.currentWeight} kg → Goal: {profile.targetWeight} kg ({profile.targetDays} din)
+          Weight: {profile.currentWeight} kg → Goal: {profile.targetWeight} kg ({profile.targetDays} days)
         </Muted>
         <Muted>Activity: {activity}</Muted>
         <Button
-          title="Goal / profile edit karo"
+          title="Edit goal / profile"
           variant="secondary"
           onPress={() => router.push({ pathname: '/onboarding', params: { edit: '1' } })}
         />
@@ -91,14 +91,14 @@ export default function ProfileScreen() {
 
       <Card>
         <H2>Units & preferences</H2>
-        <Muted small>Units: kg, cm, ml aur kcal (metric).</Muted>
+        <Muted small>Units: kg, cm, ml and kcal (metric).</Muted>
         <View style={st.switchRow}>
-          <Text style={st.switchLabel}>Alcohol calorie estimates dikhao</Text>
+          <Text style={st.switchLabel}>Show alcohol calorie estimates</Text>
           <Switch
             value={prefs.showAlcohol}
             onValueChange={(v) => void setPrefs({ ...prefs, showAlcohol: v })}
-            trackColor={{ true: colors.green, false: colors.input }}
-            thumbColor={prefs.showAlcohol ? colors.lime : colors.muted}
+            trackColor={{ true: colors.green, false: colors.cardBorder }}
+            thumbColor="#FFFFFF"
           />
         </View>
       </Card>
@@ -106,16 +106,16 @@ export default function ProfileScreen() {
       <Card>
         <H2>Cloud sync (optional)</H2>
         {!cloudEnabled ? (
-          <Muted small>Is build mein cloud sync on nahi hai. App poori tarah offline kaam karti hai.</Muted>
+          <Muted small>Cloud sync isn't enabled in this build. The app works fully offline.</Muted>
         ) : session ? (
           <>
-            <Muted>Logged in: {session.user.email}</Muted>
+            <Muted>Logged in as: {session.user.email}</Muted>
             {SYNC_TEXT[syncState] ? (
               <Notice tone={syncState === 'error' ? 'danger' : 'info'} text={SYNC_TEXT[syncState]} />
             ) : null}
-            <Button title="Abhi sync karo" variant="secondary" onPress={() => void syncNow()} />
-            <Button title="Logout" variant="secondary" onPress={logout} />
-            <Button title="Account delete karo" variant="danger" onPress={confirmDeleteAccount} />
+            <Button title="Sync now" variant="secondary" onPress={() => void syncNow()} />
+            <Button title="Log out" variant="secondary" onPress={logout} />
+            <Button title="Delete account" variant="danger" onPress={confirmDeleteAccount} />
           </>
         ) : (
           <AuthPanel />
@@ -123,9 +123,9 @@ export default function ProfileScreen() {
       </Card>
 
       <Button title="Privacy policy" variant="secondary" onPress={() => router.push('/privacy')} />
-      <Button title="Phone ka data delete karo" variant="danger" onPress={confirmResetLocal} />
+      <Button title="Delete phone data" variant="danger" onPress={confirmResetLocal} />
       <Muted small center>
-        DrinkFit 100% free hai — koi subscription, ads ya payment nahi.
+        DrinkFit is 100% free. No subscriptions, ads or payments.
       </Muted>
     </Screen>
   );
@@ -144,17 +144,17 @@ function AuthPanel() {
       setMsg({ text: await fn(), error: false });
     } catch (e: unknown) {
       const m = e instanceof Error ? e.message : '';
-      setMsg({ text: `Kuch gadbad hui. ${m}`.trim(), error: true });
+      setMsg({ text: `Something went wrong. ${m}`.trim(), error: true });
     } finally {
       setBusy(false);
     }
   };
 
   const checkEmail = () => {
-    if (!/^\S+@\S+\.\S+$/.test(email.trim())) throw new Error('Sahi email daalo.');
+    if (!/^\S+@\S+\.\S+$/.test(email.trim())) throw new Error('Please enter a valid email.');
   };
   const checkPassword = () => {
-    if (password.length < 6) throw new Error('Password kam se kam 6 characters ka ho.');
+    if (password.length < 6) throw new Error('Password must be at least 6 characters.');
   };
 
   const login = () =>
@@ -162,8 +162,8 @@ function AuthPanel() {
       checkEmail();
       checkPassword();
       const { error } = await supabase!.auth.signInWithPassword({ email: email.trim(), password });
-      if (error) throw new Error('Email ya password galat hai.');
-      return 'Login ho gaya ✓ Data sync ho raha hai.';
+      if (error) throw new Error('Incorrect email or password.');
+      return 'Logged in ✓ Syncing your data.';
     });
 
   const signup = () =>
@@ -172,7 +172,7 @@ function AuthPanel() {
       checkPassword();
       const { data, error } = await supabase!.auth.signUp({ email: email.trim(), password });
       if (error) throw error;
-      return data.session ? 'Account ban gaya ✓' : 'Account ban gaya! Email confirm karo, phir login karo.';
+      return data.session ? 'Account created ✓' : 'Account created! Confirm your email, then log in.';
     });
 
   const reset = () =>
@@ -180,20 +180,20 @@ function AuthPanel() {
       checkEmail();
       const { error } = await supabase!.auth.resetPasswordForEmail(email.trim());
       if (error) throw error;
-      return 'Password reset link tumhare email par bhej diya.';
+      return 'A password reset link has been sent to your email.';
     });
 
   return (
     <View style={{ gap: 10 }}>
       <Muted small>
-        Account sirf tab chahiye jab data dusre phone par bhi chahiye. Bina account ke bhi app poori chalti hai.
+        You only need an account if you want your data on another phone too. The app works fully without one.
       </Muted>
       <Field label="Email" keyboardType="email-address" autoCapitalize="none" value={email} onChangeText={setEmail} />
       <Field label="Password" keyboardType="default" autoCapitalize="none" secureTextEntry value={password} onChangeText={setPassword} />
       {msg && <Notice tone={msg.error ? 'danger' : 'info'} text={msg.text} />}
-      <Button title="Login" onPress={login} disabled={busy} />
-      <Button title="Naya account banao" variant="secondary" onPress={signup} disabled={busy} />
-      <Button title="Password bhool gaye?" variant="secondary" onPress={reset} disabled={busy} />
+      <Button title="Log in" onPress={login} disabled={busy} />
+      <Button title="Create new account" variant="secondary" onPress={signup} disabled={busy} />
+      <Button title="Forgot password?" variant="secondary" onPress={reset} disabled={busy} />
     </View>
   );
 }

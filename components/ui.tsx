@@ -45,7 +45,7 @@ export function Button({
       accessibilityRole="button"
       style={({ pressed }) => [s.btn, variantStyle, (pressed || disabled) && s.dim]}
     >
-      <Text style={[s.btnText, variant === 'primary' && s.btnTextDark, variant === 'danger' && s.btnTextDanger]}>
+      <Text style={[s.btnText, variant === 'primary' && s.btnTextOnPrimary, variant === 'danger' && s.btnTextDanger]}>
         {title}
       </Text>
     </Pressable>
@@ -116,7 +116,7 @@ export function Chips<T extends string>({
 export function Notice({ text, tone = 'warn' }: { text: string; tone?: 'warn' | 'danger' | 'info' }) {
   const c = tone === 'danger' ? colors.danger : tone === 'info' ? colors.green : colors.warn;
   return (
-    <View style={[s.notice, { borderColor: c }]}>
+    <View style={[s.notice, { borderColor: c, backgroundColor: `${c}12` }]}>
       <Text style={[s.noticeText, { color: c }]}>{text}</Text>
     </View>
   );
@@ -161,16 +161,16 @@ const s = StyleSheet.create({
     fontSize: 16,
     marginTop: 4,
     borderWidth: 1,
-    borderColor: 'transparent',
+    borderColor: colors.cardBorder,
   },
   inputError: { borderColor: colors.danger },
   error: { color: colors.danger, fontSize: 12.5 },
   btn: { borderRadius: 14, paddingVertical: 15, alignItems: 'center' },
   btnPrimary: { backgroundColor: colors.lime },
   btnSecondary: { backgroundColor: colors.input, borderWidth: 1, borderColor: colors.cardBorder },
-  btnDanger: { backgroundColor: 'rgba(248,113,113,0.12)', borderWidth: 1, borderColor: colors.danger },
+  btnDanger: { backgroundColor: 'rgba(220,38,38,0.08)', borderWidth: 1, borderColor: colors.danger },
   btnText: { color: colors.text, fontSize: 16, fontWeight: '700' },
-  btnTextDark: { color: '#0B0F0C' },
+  btnTextOnPrimary: { color: '#FFFFFF' },
   btnTextDanger: { color: colors.danger },
   dim: { opacity: 0.6 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 },
@@ -182,10 +182,10 @@ const s = StyleSheet.create({
     borderColor: colors.cardBorder,
     backgroundColor: colors.input,
   },
-  chipActive: { backgroundColor: 'rgba(163,230,53,0.15)', borderColor: colors.lime },
+  chipActive: { backgroundColor: 'rgba(77,124,15,0.10)', borderColor: colors.lime },
   chipText: { color: colors.text, fontSize: 14 },
   chipTextActive: { color: colors.lime, fontWeight: '700' },
-  notice: { borderWidth: 1, borderRadius: 12, padding: 12, backgroundColor: 'rgba(255,255,255,0.03)' },
+  notice: { borderWidth: 1, borderRadius: 12, padding: 12 },
   noticeText: { fontSize: 13.5, lineHeight: 19 },
   stat: {
     flexBasis: '47%',

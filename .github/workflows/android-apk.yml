@@ -37,8 +37,8 @@ jobs:
         working-directory: drinkfit
         run: |
           rm -f App.tsx index.ts
-          npx expo install expo-router react-native-safe-area-context react-native-screens expo-linking expo-constants expo-status-bar react-native-svg @react-native-async-storage/async-storage expo-secure-store @supabase/supabase-js react-native-url-polyfill
-          npx expo install jest-expo jest @types/jest -- --save-dev
+          npx expo install react-dom expo-router react-native-safe-area-context react-native-screens expo-linking expo-constants expo-status-bar react-native-svg @react-native-async-storage/async-storage expo-secure-store @supabase/supabase-js react-native-url-polyfill -- --legacy-peer-deps
+          npx expo install jest-expo jest @types/jest -- --save-dev --legacy-peer-deps
 
       - name: Copy DrinkFit code into project
         run: |

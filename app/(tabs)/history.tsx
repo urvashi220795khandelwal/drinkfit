@@ -1,136 +1,121 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Redirect, router } from 'expo-router';
-import { ProgressRing } from '../../components/ProgressRing';
-import { Button, Card, H1, H2, Muted, Notice, Screen, Stat } from '../../components/ui';
+import { Card, H1, H2, Muted, Screen } from '../../components/ui';
 import { colors } from '../../constants/theme';
 import { useApp } from '../../hooks/useAppData';
-import { computeDaySummary, type AlcoholEquivalents, type TargetAdjustment } from '../../utils/calculator';
-import { dateKey, formatDateKey } from '../../utils/date';
+import { computeDaySummary, effectiveExerciseCalories } from '../../utils/calculator';
+import { formatDateKey, lastNDays, shortDateKey } from '../../utils/date';
 
-const ADJUST_MSG: Record<Exclude<TargetAdjustment, null>, string> = {
-  deficit_capped:
-    'Tumhara goal bahut fast tha, isliye deficit 1000 kcal/din tak limit kiya gaya. Target days badhana better hoga.',
-  surplus_capped: 'Weight gain ke liye surplus 500 kcal/din tak limit kiya gaya.',
-  min_floor:
-    'Calorie target safe minimum se neeche ja raha tha, isliye minimum par set kiya. Doctor ya dietitian se baat karo.',
-};
+const BAR_HEIGHT = 120;
 
-export default function Dashboard() {
-  const { profile, logs, prefs } = useApp();
+export default function History() {
+  const { profile, logs, removeLog } = useApp();
   if (!profile) return <Redirect href="/onboarding" />;
 
-  const today = dateKey();
-  const log = logs.find((l) => l.logDate === today) ?? null;
-  const d = computeDaySummary(profile, log);
+  const exerciseOf = (l: (typeof logs)[number]) => effectiveExerciseCalories(l, l.weightKg ?? profile.currentWeight);
+  const week = lastNDays(7).map((key) => ({ key, log: logs.find((l) => l.logDate === key) ?? null }));
+  const logged = week.filter((w) => w.log !== null);
+  const target = computeDaySummary(profile, null).target?.target ?? 0;
+  const avgFood = logged.length
+    ? Math.round(logged.reduce((s, w) => s + (w.log?.foodCalories ?? 0), 0) / logged.length)
+    : 0;
+  const weekExercise = logged.reduce((s, w) => s + (w.log ? exerciseOf(w.log) : 0), 0);
+  const maxBar = Math.max(target, ...week.map((w) => w.log?.foodCalories ?? 0), 1);
 
-  if (d.bmr === null || d.tdee === null || d.target === null || d.remaining === null) {
-    return (
-      <Screen>
-        <H1>Aaj ka calorie budget</H1>
-        <Notice tone="danger" text="BMR available nahi hai. Profile mein apna estimated BMR daalo." />
-        <Button title="Profile edit karo" onPress={() => router.push({ pathname: '/onboarding', params: { edit: '1' } })} />
-      </Screen>
-    );
-  }
+  const weights = logs.filter((l) => l.weightKg !== null).sort((a, b) => a.logDate.localeCompare(b.logDate));
+  const latest = weights.length ? weights[weights.length - 1].weightKg! : profile.currentWeight;
+  const change = +(latest - profile.currentWeight).toFixed(1);
+  const toGoal = +Math.abs(latest - profile.targetWeight).toFixed(1);
 
-  const budget = d.target.target + d.exercise;
-  const progress = budget > 0 ? d.food / budget : 1;
-  const over = d.remaining < 0;
-  const ringColor = over ? colors.danger : progress > 0.85 ? colors.warn : colors.lime;
+  const confirmDelete = (date: string) =>
+    Alert.alert('Entry delete karein?', `${formatDateKey(date)} ki entry hamesha ke liye hat jayegi.`, [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Delete', style: 'destructive', onPress: () => void removeLog(date) },
+    ]);
 
   return (
     <Screen>
-      <View>
-        <Text style={st.brand}>DrinkFit</Text>
-        <Muted>{formatDateKey(today)} • Tumhari daily progress</Muted>
-      </View>
+      <H1>History & progress</H1>
 
-      <Card style={st.center}>
-        <H2>Aaj ka calorie budget</H2>
-        <ProgressRing
-          progress={progress}
-          color={ringColor}
-          centerTop={String(Math.abs(d.remaining))}
-          centerBottom={over ? 'kcal zyada ho gayi' : 'kcal baaki'}
-        />
-        <Muted small center>
-          {d.food} kcal khaya • {budget} kcal total budget (target + exercise)
+      <Card>
+        <H2>Is hafte</H2>
+        <Muted>
+          {logged.length}/7 din entry • Avg food {avgFood} kcal • Exercise {weekExercise} kcal
+        </Muted>
+        <View style={st.chart}>
+          {target > 0 && <View style={[st.targetLine, { bottom: (target / maxBar) * BAR_HEIGHT + 18 }]} />}
+          {week.map((w) => {
+            const food = w.log?.foodCalories ?? 0;
+            const overTarget = target > 0 && food > target;
+            return (
+              <View key={w.key} style={st.barCol}>
+                <View
+                  style={[
+                    st.bar,
+                    { height: Math.max(3, (food / maxBar) * BAR_HEIGHT), backgroundColor: overTarget ? colors.danger : colors.lime },
+                  ]}
+                />
+                <Text style={st.barLabel}>{shortDateKey(w.key)}</Text>
+              </View>
+            );
+          })}
+        </View>
+        <Muted small>Dotted line = daily target ({target} kcal). Laal bar = target se zyada.</Muted>
+      </Card>
+
+      <Card>
+        <H2>Weight progress</H2>
+        <Muted>
+          Shuruaat: {profile.currentWeight} kg • Latest: {latest} kg • Change: {change > 0 ? '+' : ''}
+          {change} kg
+        </Muted>
+        <Muted>
+          Goal ({profile.targetWeight} kg) tak abhi {toGoal} kg baaki.
         </Muted>
       </Card>
 
-      {!log && <Notice tone="info" text="Aaj ki entry abhi nahi hui. Food aur exercise add karo taaki budget sahi dikhe." />}
-      <Button title={log ? 'Aaj ki entry edit karo' : '+ Aaj ki entry add karo'} onPress={() => router.push('/daily-input')} />
-      {d.target.adjustment ? <Notice text={ADJUST_MSG[d.target.adjustment]} /> : null}
-
-      <View style={st.grid}>
-        <Stat label="BMR (aaram mein)" value={d.bmr} />
-        <Stat label="TDEE (activity ke saath)" value={d.tdee} />
-        <Stat label="Daily target (estimate)" value={d.target.target} />
-        <Stat label="Food calories" value={d.food} />
-        <Stat label="Exercise calories" value={d.exercise} color={colors.green} />
-        <Stat label="Remaining budget" value={d.remaining} color={over ? colors.danger : colors.lime} />
-      </View>
-      <Muted small>
-        Remaining = Target − Food + Exercise. Steps alag se add nahi hote, kyunki wo activity level mein already count
-        hain.
-      </Muted>
-
-      {prefs.showAlcohol && <AlcoholCard remaining={d.remaining} alcohol={d.alcohol} />}
+      <H2>Saari entries</H2>
+      {logs.length === 0 && <Muted>Abhi koi entry nahi hai. Dashboard se aaj ki entry add karo.</Muted>}
+      {logs.map((l) => (
+        <Card key={l.logDate}>
+          <Text style={st.date}>{formatDateKey(l.logDate)}</Text>
+          <Muted small>
+            Food {l.foodCalories} kcal • Exercise {exerciseOf(l)} kcal • Steps {l.steps}
+            {l.weightKg !== null ? ` • Weight ${l.weightKg} kg` : ''}
+          </Muted>
+          <View style={st.actions}>
+            <Pressable
+              style={st.action}
+              onPress={() => router.push({ pathname: '/daily-input', params: { date: l.logDate } })}
+            >
+              <Text style={st.actionText}>Edit</Text>
+            </Pressable>
+            <Pressable style={st.action} onPress={() => confirmDelete(l.logDate)}>
+              <Text style={[st.actionText, { color: colors.danger }]}>Delete</Text>
+            </Pressable>
+          </View>
+        </Card>
+      ))}
     </Screen>
   );
 }
 
-function AlcoholCard({ remaining, alcohol }: { remaining: number; alcohol: AlcoholEquivalents }) {
-  const none = remaining <= 0;
-  return (
-    <Card>
-      <H2>Alcohol calorie equivalents</H2>
-      <Muted small>
-        Ye sirf batata hai ki bachi hui calories kitne ml drink ke barabar hain. Ye safe drinking limit ya
-        recommendation NAHI hai.
-      </Muted>
-      {none ? (
-        <Notice tone="danger" text="Aaj calorie budget cross ho gaya — alcohol avoid karna better hai." />
-      ) : (
-        <Notice text="Alcohol calories tumhare weight-loss goal ko affect kar sakti hain." />
-      )}
-      <AlcoholRow label="Beer ki calories (5%)" sub="43 kcal / 100 ml" ml={alcohol.beerMl} />
-      <AlcoholRow label="Whiskey/Vodka ki calories (40%)" sub="231 kcal / 100 ml" ml={alcohol.spiritsMl} />
-      <AlcoholRow label="Wine ki calories (12%)" sub="83 kcal / 100 ml" ml={alcohol.wineMl} />
-      <Text style={st.zero}>✓ 0 ml — Zero alcohol hamesha ek option hai, aur health ke liye sabse best.</Text>
-      <Muted small>
-        Alcohol ke health risks calories se kahin zyada hain. Pregnancy, medicines, driving ya kisi health condition mein
-        alcohol bilkul na lo.
-      </Muted>
-    </Card>
-  );
-}
-
-function AlcoholRow({ label, sub, ml }: { label: string; sub: string; ml: number }) {
-  return (
-    <View style={st.row}>
-      <View style={{ flex: 1 }}>
-        <Text style={st.rowLabel}>{label}</Text>
-        <Muted small>{sub}</Muted>
-      </View>
-      <Text style={st.rowValue}>≈ {ml} ml</Text>
-    </View>
-  );
-}
-
 const st = StyleSheet.create({
-  brand: { color: colors.lime, fontSize: 28, fontWeight: '900' },
-  center: { alignItems: 'center' },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  chart: { height: BAR_HEIGHT + 24, flexDirection: 'row', alignItems: 'flex-end', gap: 8, marginTop: 8 },
+  targetLine: { position: 'absolute', left: 0, right: 0, borderTopWidth: 1, borderStyle: 'dashed', borderColor: colors.muted },
+  barCol: { flex: 1, alignItems: 'center', gap: 4 },
+  bar: { width: '70%', borderRadius: 6 },
+  barLabel: { color: colors.muted, fontSize: 11 },
+  date: { color: colors.text, fontSize: 16, fontWeight: '700' },
+  actions: { flexDirection: 'row', gap: 10 },
+  action: {
+    paddingHorizontal: 14,
     paddingVertical: 8,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.cardBorder,
+    borderRadius: 10,
+    backgroundColor: colors.input,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
   },
-  rowLabel: { color: colors.text, fontSize: 15, fontWeight: '600' },
-  rowValue: { color: colors.text, fontSize: 16, fontWeight: '700' },
-  zero: { color: colors.green, fontSize: 14, fontWeight: '700' },
+  actionText: { color: colors.text, fontWeight: '600' },
 });

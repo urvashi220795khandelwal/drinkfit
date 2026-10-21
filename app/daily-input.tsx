@@ -61,13 +61,13 @@ export default function DailyInput() {
 
   return (
     <Screen>
-      <H1>{existing ? 'Entry edit karo' : 'Aaj ki entry'}</H1>
+      <H1>{existing ? 'Edit entry' : "Today's entry"}</H1>
       <Muted>{formatDateKey(logDate)}</Muted>
 
       <Card>
         <Field
           label="Food calories (kcal)"
-          hint="Aaj jo bhi khaya-piya uski total calories."
+          hint="Total calories from everything you ate and drank today."
           keyboardType="number-pad"
           value={form.foodCalories}
           onChangeText={set('foodCalories')}
@@ -76,7 +76,7 @@ export default function DailyInput() {
         />
         <Field
           label="Daily steps"
-          hint="Sirf tracking ke liye. Calories mein add nahi hote, kyunki ye activity level mein already count hain."
+          hint="For tracking only. Steps aren't added to calories because they're already counted in your activity level."
           keyboardType="number-pad"
           value={form.steps}
           onChangeText={set('steps')}
@@ -91,7 +91,7 @@ export default function DailyInput() {
         {form.exerciseType !== 'none' && (
           <>
             <Field
-              label="Exercise kitne minute?"
+              label="Exercise duration (minutes)"
               keyboardType="number-pad"
               value={form.exerciseMinutes}
               onChangeText={set('exerciseMinutes')}
@@ -99,7 +99,7 @@ export default function DailyInput() {
             />
             <Field
               label="Exercise calories burned (optional)"
-              hint={`Watch/app se pata ho to daalo. Khaali chhodo to app estimate karega: ~${estimate} kcal. Calories sirf ek hi baar count hongi.`}
+              hint={`Enter this if your watch or app shows it. Leave it blank and the app will estimate ~${estimate} kcal. Calories are only counted once.`}
               keyboardType="number-pad"
               value={form.exerciseCalories}
               onChangeText={set('exerciseCalories')}
@@ -111,16 +111,16 @@ export default function DailyInput() {
 
       <Card>
         <Field
-          label="Aaj ka weight (kg, optional)"
-          hint="Progress track karne ke liye."
+          label="Today's weight (kg, optional)"
+          hint="Helps track your progress."
           value={form.weightKg}
           onChangeText={set('weightKg')}
           error={errors.weightKg}
         />
       </Card>
 
-      {Object.keys(errors).length > 0 && <Notice tone="danger" text="Kuch fields theek karni hain — upar laal text dekho." />}
-      <Button title={saving ? 'Save ho raha hai...' : 'Save karo'} onPress={onSave} disabled={saving} />
+      {Object.keys(errors).length > 0 && <Notice tone="danger" text="Some fields need fixing. Check the red text above." />}
+      <Button title={saving ? 'Saving...' : 'Save'} onPress={onSave} disabled={saving} />
       <Button title="Cancel" variant="secondary" onPress={goBack} />
     </Screen>
   );

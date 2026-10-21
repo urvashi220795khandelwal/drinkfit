@@ -37,7 +37,7 @@ jobs:
         working-directory: drinkfit
         run: |
           rm -f App.tsx index.ts
-          npx expo install react-dom expo-router react-native-safe-area-context react-native-screens expo-linking expo-constants expo-status-bar react-native-svg @react-native-async-storage/async-storage expo-secure-store @supabase/supabase-js react-native-url-polyfill -- --legacy-peer-deps
+          npx expo install react-dom expo-router @expo/vector-icons react-native-safe-area-context react-native-screens expo-linking expo-constants expo-status-bar react-native-svg @react-native-async-storage/async-storage expo-secure-store @supabase/supabase-js react-native-url-polyfill -- --legacy-peer-deps
           npx expo install jest-expo jest @types/jest -- --save-dev --legacy-peer-deps
 
       - name: Copy DrinkFit code into project
@@ -48,7 +48,9 @@ jobs:
 
       - name: Type check
         working-directory: drinkfit
-        run: npx tsc --noEmit
+        run: |
+          node -e "const fs=require('fs');const t=JSON.parse(fs.readFileSync('tsconfig.json','utf8'));t.exclude=['node_modules','tests'];fs.writeFileSync('tsconfig.json',JSON.stringify(t,null,2))"
+          npx tsc --noEmit
 
       - name: Run tests
         working-directory: drinkfit

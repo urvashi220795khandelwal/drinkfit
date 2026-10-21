@@ -52,22 +52,22 @@ export default function Onboarding() {
   return (
     <Screen>
       {isEdit ? (
-        <H1>Profile edit karo</H1>
+        <H1>Edit profile</H1>
       ) : (
         <View style={st.hero}>
           <Text style={st.brand}>DrinkFit</Text>
           <Text style={st.tagline}>Smart Drinking. Smarter Goals.</Text>
           <Muted>
-            Apni details bharo — hum tumhara daily calorie budget estimate karenge. App poori tarah free hai aur data
-            tumhare phone par save hota hai.
+            Fill in your details and we'll estimate your daily calorie budget. The app is completely free and your data
+            is saved on your phone.
           </Muted>
         </View>
       )}
 
       <Card>
         <Field
-          label="Umar (saal)"
-          hint="BMR calculate karne ke liye. DrinkFit sirf 18+ ke liye hai."
+          label="Age (years)"
+          hint="Used to calculate your BMR. DrinkFit is for ages 18+ only."
           keyboardType="number-pad"
           value={form.age}
           onChangeText={set('age')}
@@ -75,14 +75,14 @@ export default function Onboarding() {
         />
 
         <Label>Gender</Label>
-        <Muted small>BMR formula male aur female ke liye alag hota hai.</Muted>
+        <Muted small>The BMR formula is different for males and females.</Muted>
         <Chips options={GENDER_OPTIONS} value={form.gender} onChange={set('gender')} />
         {form.gender === 'other' && (
           <>
-            <Notice text="Standard BMR formula sirf male/female ke liye bana hai, isliye tumhare liye exact calculate nahi ho sakta. Apna estimated BMR daalo (doctor, dietitian ya body-composition scale se)." />
+            <Notice text="The standard BMR formula only covers male and female, so we can't calculate yours exactly. Enter your estimated BMR (from a doctor, dietitian, or body-composition scale)." />
             <Field
-              label="Estimated BMR (kcal/din)"
-              hint="Aam taur par 1200–2000 ke beech hota hai."
+              label="Estimated BMR (kcal/day)"
+              hint="Usually between 1200 and 2000."
               keyboardType="number-pad"
               value={form.manualBmr}
               onChangeText={set('manualBmr')}
@@ -92,8 +92,8 @@ export default function Onboarding() {
         )}
 
         <Field
-          label="Abhi ka weight (kg)"
-          hint="Subah khaali pet ka weight sabse accurate hota hai."
+          label="Current weight (kg)"
+          hint="Your weight in the morning on an empty stomach is the most accurate."
           value={form.currentWeight}
           onChangeText={set('currentWeight')}
           error={errors.currentWeight}
@@ -107,14 +107,14 @@ export default function Onboarding() {
         />
         <Field
           label="Target weight (kg)"
-          hint="Tum kis weight tak pahunchna chahte ho."
+          hint="The weight you want to reach."
           value={form.targetWeight}
           onChangeText={set('targetWeight')}
           error={errors.targetWeight}
         />
         <Field
-          label="Target kitne din mein?"
-          hint="Realistic goal: hafte mein 0.5–1 kg. Example: 5 kg ke liye ~60 din."
+          label="Days to reach your target"
+          hint="A realistic goal is 0.5–1 kg per week. Example: ~60 days for 5 kg."
           keyboardType="number-pad"
           value={form.targetDays}
           onChangeText={set('targetDays')}
@@ -126,11 +126,11 @@ export default function Onboarding() {
         {activity?.hint ? <Muted small>{activity.hint}</Muted> : null}
       </Card>
 
-      {hasErrors && <Notice tone="danger" text="Kuch fields theek karni hain — upar laal text dekho." />}
-      <Button title={saving ? 'Save ho raha hai...' : isEdit ? 'Save karo' : 'Shuru karo'} onPress={onSave} disabled={saving} />
+      {hasErrors && <Notice tone="danger" text="Some fields need fixing. Check the red text above." />}
+      <Button title={saving ? 'Saving...' : isEdit ? 'Save' : 'Get started'} onPress={onSave} disabled={saving} />
       {isEdit && <Button title="Cancel" variant="secondary" onPress={() => router.back()} />}
       <Muted small center>
-        Saare results sirf estimate hain, medical advice nahi.
+        All results are estimates, not medical advice.
       </Muted>
     </Screen>
   );
